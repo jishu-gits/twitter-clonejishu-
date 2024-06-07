@@ -1,19 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-
 import Posts from "../../components/common/Posts";
 import ProfileHeaderSkeleton from "../../components/skeletons/ProfileHeaderSkeleton";
 import EditProfileModal from "./EditProfileModal";
-
-
-
 import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
 import { formatMemberSinceDate } from "../../utils/date";
-
 import useFollow from "../../hooks/useFollow";
 import useUpdateUserProfile from "../../hooks/useUpdateUserProfile";
 
@@ -26,33 +21,27 @@ const ProfilePage = () => {
 	const profileImgRef = useRef(null);
 
 	const { username } = useParams();
-
 	const { follow, isPending } = useFollow();
 	const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
-	const {
-		data: user,
-		isLoading,
-		refetch,
-		isRefetching,
-	} = useQuery({
-		queryKey: ["userProfile"],
+	const { data: user, isLoading, refetch, isRefetching } = useQuery({
+		queryKey: ["userProfile", username],
 		queryFn: async () => {
-			try {
-				const res = await fetch(`/api/users/profile/${username}`);
-				const data = await res.json();
-				if (!res.ok) {
-					throw new Error(data.error || "Something went wrong");
-				}
-				return data;
-			} catch (error) {
-				throw new Error(error);
+			const token = localStorage.getItem("authToken"); // Retrieve token from local storage
+			const res = await fetch(`/api/users/profile/${username}`, {
+				headers: {
+					Authorization: `Bearer ${token}`, // Include token in the request headers
+				},
+			});
+			const data = await res.json();
+			if (!res.ok) {
+				throw new Error(data.error || "Something went wrong");
 			}
+			return data;
 		},
 	});
 
 	const { isUpdatingProfile, updateProfile } = useUpdateUserProfile();
-
 	const isMyProfile = authUser._id === user?._id;
 	const memberSinceDate = formatMemberSinceDate(user?.createdAt);
 	const amIFollowing = authUser?.following.includes(user?._id);
@@ -62,8 +51,8 @@ const ProfilePage = () => {
 		if (file) {
 			const reader = new FileReader();
 			reader.onload = () => {
-				state === "coverImg" && setCoverImg(reader.result);
-				state === "profileImg" && setProfileImg(reader.result);
+				if (state === "coverImg") setCoverImg(reader.result);
+				if (state === "profileImg") setProfileImg(reader.result);
 			};
 			reader.readAsDataURL(file);
 		}
@@ -78,7 +67,9 @@ const ProfilePage = () => {
 			<div className='flex-[4_4_0]  border-r border-gray-700 min-h-screen '>
 				{/* HEADER */}
 				{(isLoading || isRefetching) && <ProfileHeaderSkeleton />}
-				{!isLoading && !isRefetching && !user && <p className='text-center text-lg mt-4'>User not found</p>}
+				{!isLoading && !isRefetching && !user && (
+					<p className='text-center text-lg mt-4'>User not found</p>
+				)}
 				<div className='flex flex-col'>
 					{!isLoading && !isRefetching && user && (
 						<>
@@ -88,7 +79,7 @@ const ProfilePage = () => {
 								</Link>
 								<div className='flex flex-col'>
 									<p className='font-bold text-lg'>{user?.fullName}</p>
-									<span className='text-sm text-slate-500'>{POSTS?.length} posts</span>
+									<span className='text-sm text-slate-500'>{user.posts.length} posts</span>
 								</div>
 							</div>
 							{/* COVER IMG */}
@@ -106,7 +97,6 @@ const ProfilePage = () => {
 										<MdEdit className='w-5 h-5 text-white' />
 									</div>
 								)}
-
 								<input
 									type='file'
 									hidden
@@ -124,7 +114,10 @@ const ProfilePage = () => {
 								{/* USER AVATAR */}
 								<div className='avatar absolute -bottom-16 left-4'>
 									<div className='w-32 rounded-full relative group/avatar'>
-										<img src={profileImg || user?.profileImg || "/avatar-placeholder.png"} />
+										<img
+											src={profileImg || user?.profileImg || "/avatar-placeholder.png"}
+											alt='Profile'
+										/>
 										<div className='absolute top-5 right-3 p-1 bg-primary rounded-full group-hover/avatar:opacity-100 opacity-0 cursor-pointer'>
 											{isMyProfile && (
 												<MdEdit
@@ -161,26 +154,23 @@ const ProfilePage = () => {
 									</button>
 								)}
 							</div>
-
 							<div className='flex flex-col gap-4 mt-14 px-4'>
 								<div className='flex flex-col'>
 									<span className='font-bold text-lg'>{user?.fullName}</span>
 									<span className='text-sm text-slate-500'>@{user?.username}</span>
 									<span className='text-sm my-1'>{user?.bio}</span>
 								</div>
-
 								<div className='flex gap-2 flex-wrap'>
 									{user?.link && (
 										<div className='flex gap-1 items-center '>
 											<>
 												<FaLink className='w-3 h-3 text-slate-500' />
 												<a
-													href='https://youtube.com/@asaprogrammer_'
+													href={user?.link}
 													target='_blank'
 													rel='noreferrer'
 													className='text-sm text-blue-500 hover:underline'
 												>
-													{/* Updated this after recording the video. I forgot to update this while recording, sorry, thx. */}
 													{user?.link}
 												</a>
 											</>
@@ -224,11 +214,11 @@ const ProfilePage = () => {
 							</div>
 						</>
 					)}
-
 					<Posts feedType={feedType} username={username} userId={user?._id} />
 				</div>
 			</div>
 		</>
 	);
 };
+
 export default ProfilePage;
