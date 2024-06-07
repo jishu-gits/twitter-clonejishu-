@@ -56,19 +56,19 @@ const LoginPage = () => {
 	const { isPending, isError, error } = loginMutation;
 
 	return (
-		<div className='min-h-screen bg-gray-50 flex flex-col justify-center items-center'>
-			<div className='bg-white shadow-2xl rounded-xl p-10 max-w-md w-full'>
-				<div className='flex justify-center mb-8'>
-					<BubbleSvg className='w-20 h-20 fill-current text-blue-500' />
+		<div className='min-h-screen bg-gray-100 flex items-center justify-center px-4'>
+			<div className='bg-white shadow-lg rounded-lg p-8 max-w-md w-full'>
+				<div className='flex justify-center mb-6'>
+					<BubbleSvg className='w-16 h-16 text-blue-500' />
 				</div>
-				<h1 className='text-3xl font-bold text-center mb-6'>Log In</h1>
+				<h1 className='text-2xl font-semibold text-center text-gray-700 mb-4'>Log In</h1>
 				<form className='space-y-6' onSubmit={handleSubmit}>
 					<div className='flex flex-col'>
-						<label className='flex items-center gap-2'>
-							<MdOutlineMail className='text-gray-500' />
+						<label className='flex items-center gap-2 mb-2'>
+							<MdOutlineMail className='text-gray-400' />
 							<input
 								type='text'
-								className='border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full'
+								className='border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full'
 								placeholder='Username'
 								name='username'
 								onChange={handleInputChange}
@@ -78,11 +78,11 @@ const LoginPage = () => {
 					</div>
 
 					<div className='flex flex-col'>
-						<label className='flex items-center gap-2'>
-							<MdPassword className='text-gray-500' />
+						<label className='flex items-center gap-2 mb-2'>
+							<MdPassword className='text-gray-400' />
 							<input
 								type='password'
-								className='border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full'
+								className='border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full'
 								placeholder='Password'
 								name='password'
 								onChange={handleInputChange}
@@ -92,14 +92,14 @@ const LoginPage = () => {
 					</div>
 					<button
 						type='submit'
-						className='w-full bg-blue-500 text-white rounded-lg py-3 hover:bg-blue-600 transition duration-300'
+						className='w-full bg-blue-500 text-white rounded-md py-3 hover:bg-blue-600 transition duration-300'
 					>
 						{isPending ? "Loading..." : "Login"}
 					</button>
 					{isError && <p className='text-red-500 text-center mt-2'>{error?.message}</p>}
 				</form>
-				<div className='flex flex-col items-center gap-2 mt-8'>
-					<p className='text-gray-700'>Don't have an account?</p>
+				<div className='flex flex-col items-center gap-2 mt-6'>
+					<p className='text-gray-600'>Don't have an account?</p>
 					<Link to='/signup' className='text-blue-500 hover:underline'>
 						Sign up Now
 					</Link>
