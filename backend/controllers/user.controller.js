@@ -5,6 +5,7 @@ import { v2 as cloudinary } from "cloudinary";
 import Notification from "../models/notification.model.js";
 import User from "../models/user.model.js";
 
+// Get user profile by username
 export const getUserProfile = async (req, res) => {
     const { username } = req.params;
 
@@ -14,11 +15,12 @@ export const getUserProfile = async (req, res) => {
 
         res.status(200).json(user);
     } catch (error) {
-        console.log("Error in getUserProfile: ", error.message);
+        console.error("Error in getUserProfile:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
+// Follow or unfollow a user
 export const followUnfollowUser = async (req, res) => {
     try {
         const { id } = req.params;
@@ -56,11 +58,12 @@ export const followUnfollowUser = async (req, res) => {
             res.status(200).json({ message: "User followed successfully" });
         }
     } catch (error) {
-        console.log("Error in followUnfollowUser: ", error.message);
+        console.error("Error in followUnfollowUser:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
+// Get suggested users to follow
 export const getSuggestedUsers = async (req, res) => {
     try {
         const userId = req.user._id;
@@ -79,11 +82,12 @@ export const getSuggestedUsers = async (req, res) => {
 
         res.status(200).json(suggestedUsers);
     } catch (error) {
-        console.log("Error in getSuggestedUsers: ", error.message);
+        console.error("Error in getSuggestedUsers:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
+// Update user profile
 export const updateUser = async (req, res) => {
     const { fullName, email, username, currentPassword, newPassword, bio, link } = req.body;
     let { profileImg, coverImg } = req.body;
@@ -114,8 +118,8 @@ export const updateUser = async (req, res) => {
                 await cloudinary.uploader.destroy(user.profileImg.split("/").pop().split(".")[0]);
             }
 
-            const uploadedResponse = await cloudinary.uploader.upload(profileImg);
-            profileImg = uploadedResponse.secure_url;
+            const uploadResponse = await cloudinary.uploader.upload(profileImg);
+            profileImg = uploadResponse.secure_url;
         }
 
         if (coverImg) {
@@ -123,8 +127,8 @@ export const updateUser = async (req, res) => {
                 await cloudinary.uploader.destroy(user.coverImg.split("/").pop().split(".")[0]);
             }
 
-            const uploadedResponse = await cloudinary.uploader.upload(coverImg);
-            coverImg = uploadedResponse.secure_url;
+            const uploadResponse = await cloudinary.uploader.upload(coverImg);
+            coverImg = uploadResponse.secure_url;
         }
 
         user.fullName = fullName || user.fullName;
@@ -137,12 +141,12 @@ export const updateUser = async (req, res) => {
 
         user = await user.save();
 
-        // password should be null in response
+        // Remove password from response
         user.password = null;
 
         res.status(200).json(user);
     } catch (error) {
-        console.log("Error in updateUser: ", error.message);
+        console.error("Error in updateUser:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
